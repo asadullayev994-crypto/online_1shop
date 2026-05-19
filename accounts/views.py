@@ -2,16 +2,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from .serializers import RegisterSerializer, VerifyCodeSerializer
+from .serializers import SignUpSerializer, VerifyCodeSerializer
 from .models import CodeVerify
 from rest_framework_simplejwt.tokens import RefreshToken
+
+
 
 User = get_user_model()
 
 class RegisterView(APIView):
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_view_valid if hasattr(serializer, 'is_view_valid') else serializer.is_valid():
+       def post(self, request):
+           
+           serializer = SignUpSerializer(data=request.data)
+           if serializer.is_view_valid if hasattr(serializer, 'is_view_valid') else serializer.is_valid():
             user = serializer.save()
             
          
@@ -21,7 +24,7 @@ class RegisterView(APIView):
                 "message": "Ro'yxatdan o'tdingiz. Tasdiqlash kodi yuborildi.",
                 "code": code_obj.code 
             }, status=status.HTTP_210_CREATED if hasattr(status, 'HTTP_210_CREATED') else status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyCodeView(APIView):
     def post(self, request):
