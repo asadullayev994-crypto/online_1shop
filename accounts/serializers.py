@@ -92,3 +92,37 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             'phone_number': {'required': False},
             'address': {'required': False},
         }
+        
+        
+        
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    new_password_confirm = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({"new_password_confirm": "Yangi parollar bir-biriga mos kelmadi."})
+        return attrs
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        value = value.lower().strip()
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Bu email manzilga ega foydalanuvchi topilmadi.")
+        return value
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    code = serializers.CharField(max_length=6, required=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    new_password_confirm = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({"new_password_confirm": "Yangi parollar bir-biriga mos kelmadi."})
+        return attrs
