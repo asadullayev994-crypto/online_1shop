@@ -7,15 +7,18 @@ from products.serializers import ProductListSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductListSerializer(read_only=True)
-    total_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
         fields = ["id", "product", "quantity", "price", "total_price"]
 
+    def get_total_price(self, obj):
+        return obj.total_price
+
 
 class OrderListSerializer(serializers.ModelSerializer):
-    """Ro'yxat uchun — qisqa"""
+  
     status_display = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
@@ -24,10 +27,10 @@ class OrderListSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
-    """Batafsil — bitta buyurtma uchun"""
+  
     items = OrderItemSerializer(many=True, read_only=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
-    can_cancel = serializers.BooleanField(read_only=True)
+    can_cancel = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -37,9 +40,13 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             "items", "created_at",
         ]
 
+    def get_can_cancel(self, obj):
+        return obj.can_cancel
+
 
 class OrderCreateSerializer(serializers.ModelSerializer):
-    """Savatdan buyurtma yaratish"""
+
+
     class Meta:
         model = Order
         fields = ["shipping_address", "note"]
@@ -87,7 +94,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
 
 class OrderCancelSerializer(serializers.ModelSerializer):
-    """Buyurtmani bekor qilish"""
+  
+
     class Meta:
         model = Order
         fields = ["status"]

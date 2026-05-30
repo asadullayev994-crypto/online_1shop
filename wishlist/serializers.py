@@ -24,9 +24,20 @@ class WishlistItemSerializer(serializers.ModelSerializer):
             wishlist = Wishlist.objects.get(user=request.user)
         except Wishlist.DoesNotExist:
             return attrs
-        if WishlistItem.objects.filter(wishlist=wishlist, product_id=attrs["product_id"]).exists():
+        if WishlistItem.objects.filter(
+            wishlist=wishlist, product_id=attrs["product_id"]
+        ).exists():
             raise serializers.ValidationError("Bu mahsulot allaqachon sevimlilar ro'yxatida.")
         return attrs
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+        product_id = validated_data.pop("product_id")
+        return WishlistItem.objects.create(
+            wishlist=wishlist,
+            product_id=product_id,
+        )
 
 
 class WishlistSerializer(serializers.ModelSerializer):

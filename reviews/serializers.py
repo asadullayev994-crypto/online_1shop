@@ -39,7 +39,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class ReviewUpdateSerializer(serializers.ModelSerializer):
-    """Faqat yangilash uchun — product o'zgartirib bo'lmaydi"""
+    
+
     class Meta:
         model = Review
         fields = ["rating", "title", "comment"]

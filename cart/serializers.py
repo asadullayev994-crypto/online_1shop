@@ -8,11 +8,14 @@ from products.serializers import ProductListSerializer
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductListSerializer(read_only=True)
     product_id = serializers.IntegerField(write_only=True)
-    total_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
         fields = ["id", "product", "product_id", "quantity", "total_price"]
+
+    def get_total_price(self, obj):
+        return obj.total_price
 
     def validate_product_id(self, value):
         try:
@@ -43,12 +46,34 @@ class CartItemSerializer(serializers.ModelSerializer):
             pass
         return attrs
 
+    def create(self, validated_data):
+        request = self.context.get("request")
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        product_id = validated_data.pop("product_id")
+
+       
+        item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product_id=product_id,
+            defaults={"quantity": validated_data.get("quantity", 1)},
+        )
+        if not created:
+            item.quantity += validated_data.get("quantity", 1)
+            item.save(update_fields=["quantity"])
+        return item
+
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)
-    total_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
-    total_items = serializers.IntegerField(read_only=True)
+    total_price = serializers.SerializerMethodField()
+    total_items = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
         fields = ["id", "items", "total_price", "total_items"]
+
+    def get_total_price(self, obj):
+        return obj.total_price
+
+    def get_total_items(self, obj):
+        return obj.total_items
