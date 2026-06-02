@@ -1,7 +1,24 @@
+# .gitignore
+
+# Maxfiy
 .env
+
+# Database
+db.sqlite3
+
+# Python
 venv/
 __pycache__/
-db.sqlite3
 *.pyc
 *.pyo
+*.pyd
+
+# Media fayllar
 media/
+
+# Static
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
